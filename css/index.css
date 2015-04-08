@@ -25,10 +25,10 @@ a:hover { text-decoration: underline;}
 .map_container{ padding: 20px; background: #fff; min-width: 920px; }
 .map_breadnav{ font-family: "微软雅黑"; font-size: 14px; color: #333; margin-bottom: 15px; }
 .map_mapwarp{ width: 100%; float: left; }
-.mm_inner{ margin-left: 350px; height: 600px; }
+.mm_inner{ margin-left: 370px; height: 768px; }
 #allmap{ width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑"; }
 
-.map_formwarp{ float: left; width: 350px; margin-left: -100%; }
+.map_formwarp{ float: left; width: 350px; height: 768px; margin-left: -100%; overflow: auto; }
 .mf_list .it{ width: 100%; float: left; padding-bottom: 15px; }
 .mf_list .pb3{ padding-bottom: 3px; }
 .it_label{ float: left; width: 60px; height: 5px; font-family: "微软雅黑"; font-size: 14px; color: #333; line-height: 25px; margin-right: 10px; }
