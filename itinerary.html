@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="/css/index.css">
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=eGFcuxWH8WXksA6F3xhhlwdi"></script>
+	<title>旅游景点行程安排</title>
+</head>
+<body>
+<div class="map_container">
+	<div class="clearfix">
+		<div class="map_mapwarp">
+			<div class="mm_inner">
+				<div id="allmap"></div>
+			</div>
+		</div>
+		<div class="map_formwarp">
+			<div class="map_breadnav">查询城市名->显示景点->公交查询</div>
+			<ul class="mf_list clearfix">
+				<li class="it clearfix">
+					<label class="it_label">城市名:</label>
+					<input type="text" class="it_input" id="cityName" />
+					<input type="button" class="it_searbtn" value="查询" onclick="theLocation()" />
+				</li>
+				<li class="it clearfix">
+					<label class="it_label">景点名:</label>
+					<textarea class="it_textarea" id="jdname"></textarea>
+					<input type="button" class="it_searbtn" value="显示景点" onclick="map.clearOverlays();index = 0;document.getElementById('jdnameNone').value='';bdGEO();" />
+				</li>
+				<li class="it pb3 clearfix">
+					<label class="it_label">无法查询到的景点:</label>
+					<textarea class="it_textarea" id="jdnameNone"></textarea>
+				</li>
+				<li class="it clearfix">
+					<label class="it_label"></label>
+					<p class="it_tips">无法查询景点请使用详细地址或周边替代地址查询</p>
+				</li>
+				<li class="it clearfix">
+					<label class="it_label">交通查询:</label>
+					<select class="it_select" id="cfjd">
+					</select>
+				</li>
+				<li class="it clearfix">
+					<label class="it_label"></label>
+					<select class="it_select" id="ddjd">
+					</select>
+				</li>
+				<li class="it clearfix">
+					<label class="it_label"></label>
+					<select id="cx_type">
+					<option value="1">公交</option>
+					<option value="2">步行</option>
+					<option value="3">驾车</option>
+					</select>
+				</li>
+				<li class="it clearfix">
+					<label class="it_label"></label>
+					<input type="button" value="查询交通" onclick="jtcx()" />
+					<div id="r-result"></div>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+	var cfjd=document.getElementById('cfjd');  
+	var ddjd=document.getElementById('ddjd');  
+  
+
+	var map = new BMap.Map("allmap");
+	var point = new BMap.Point(114.180375,22.301244);
+	map.centerAndZoom(point, 15);
+	//map.centerAndZoom(new BMap.Point(114.180375,22.301244),15); 
+	map.enableScrollWheelZoom(true);
+	// 创建地址解析器实例
+	var myGeo = new BMap.Geocoder();
+
+
+	//**********************************************移动城市 BEGIN**********************************************//
+	function theLocation(){
+		var city = document.getElementById("cityName").value;
+		if(city != ""){
+			map.centerAndZoom(city,15);      // 用城市名设置地图中心点
+		}
+	}
+	//**********************************************移动城市 END**********************************************//
+
+
+	//**********************************************景点方位展示 BEGIN**********************************************//
+	var index = 0;
+	function bdGEO(){
+		jdTmp = document.getElementById("jdname").value;
+		adds = jdTmp.split("\n")
+
+		var add = adds[index];
+		geocodeSearch(add);
+		index++;
+	}
+	function geocodeSearch(add){
+		if(index < adds.length){
+			setTimeout(window.bdGEO,400);
+		} 
+		if (add) {
+			myGeo.getPoint(add, function(point){
+				if (point) {
+					//document.getElementById("result").innerHTML +=  index + "、" + add + ":" + point.lng + "," + point.lat + "</br>";
+					var address = new BMap.Point(point.lng, point.lat);
+					addMarker(address,new BMap.Label(index+":"+add,{offset:new BMap.Size(0,0)}));
+
+					cfjd.options.add(new Option(add,add));
+					ddjd.options.add(new Option(add,add));
+				} else {
+					//alert(add+ '无法查询到!' );
+					document.getElementById("jdnameNone").value +=  index + "." + add + "\n";
+				}
+			}, document.getElementById("cityName").value);
+		}
+	}
+	// 编写自定义函数,创建标注
+	function addMarker(point,label){
+		var marker = new BMap.Marker(point);
+		map.addOverlay(marker);
+		marker.setLabel(label);
+	}
+	//**********************************************景点方位展示 END**********************************************//
+
+
+	//**********************************************公交，步行，驾车 BEGIN**********************************************//
+	
+	
+	var transit = new BMap.TransitRoute(map, {renderOptions: {map: map, panel: "r-result", autoViewport: true}});
+	var walking = new BMap.WalkingRoute(map, {renderOptions: {map: map, panel: "r-result", autoViewport: true}});
+	var driving = new BMap.DrivingRoute(map, {renderOptions: {map: map, panel: "r-result", autoViewport: true}});
+	function jtcx()
+	{
+		cx_type = document.getElementById("cx_type").value;
+		
+		if (cx_type == 1)
+		{
+			walking.clearResults();
+			driving.clearResults();
+			transit.search(cfjd.value, ddjd.value);
+		}
+		if(cx_type == 2) 
+		{
+			
+			transit.clearResults();
+			driving.clearResults();
+			walking.search(cfjd.value, ddjd.value);
+		}
+		if(cx_type==3)
+		{
+			transit.clearResults();
+			walking.clearResults();
+			driving.search(cfjd.value, ddjd.value);
+		}
+	}
+	//**********************************************公交，步行，驾车 END**********************************************//
+</script>
